@@ -6,5 +6,6 @@ rm(list = ls())
 
 source("R/read_params.R")
 
-params <- read_params()
+# params <- read_params()
 
+# View(params[[2]])
