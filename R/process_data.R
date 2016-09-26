@@ -4,6 +4,10 @@
 # process_data()
 # ***************************************************************************
 
+rm(list = ls())
+
+source("R/read_params.R")
+
 df <- read_sas("data/alsfjord.sas7bdat") %>%
   as_tibble() %>%
   mutate(dato = as.Date(as.character(dato), format = "%Y%m%d")) %>% 
@@ -58,7 +62,11 @@ res <- df %>%
   mutate(haard_ind1 = ifelse(hardbund_daekpct < 50, hardbund_daekpct, 50)) %>% 
   mutate(haard_ind2 = ifelse(hardbund_daekpct < 50, 0, hardbund_daekpct - 50)) %>% 
   mutate(month = lubridate::month(dato)) %>% 
-  mutate(year = lubridate::year(dato))
+  mutate(year = lubridate::year(dato)) %>% 
+  
+  filter(month %in% 5:9) %>% 
+  filter(dybde < 17)
+
 
 res
 
@@ -67,7 +75,8 @@ res
 # Now, lets calculate log_cumcover_mod.
 # ***************************************************************************
 
-params <- read_params()[[2]]
+params <- read_params()[[2]] %>% 
+  select(Effect, month, Estimate)
 
 parm_depth <- params$Estimate[params$Effect == "depth"]
 parm_H1 <- params$Estimate[params$Effect == "haard_ind1"]
@@ -75,7 +84,8 @@ parm_H2 <- params$Estimate[params$Effect == "haard_ind2"]
 
 res <- filter(params, Effect == "month") %>% 
   full_join(res, ., by = "month") %>% 
-  mutate(log_cumcover_mod = log_cumcov - Estimate - parm_depth * depth - haard_ind1 * parm_H1 - haard_ind2 * parm_H2)
+  mutate(log_cumcover_mod = log_cumcov - Estimate - parm_depth * dybde - haard_ind1 * parm_H1 - haard_ind2 * parm_H2) %>% 
+  drop_na(log_cumcover_mod)
 
 write_csv(res, "/home/persican/Desktop/data.csv")
 
