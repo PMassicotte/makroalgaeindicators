@@ -5,7 +5,7 @@
 #               which specify which indicator should be calculated.
 #<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
-get_indicator <- function(which = c("cumcover", "fraction", "succession")) {
+get_indicator <- function(df, which = c("cumcover", "fraction", "succession")) {
 
   # ***************************************************************************
   # glmm models
@@ -17,5 +17,9 @@ get_indicator <- function(which = c("cumcover", "fraction", "succession")) {
   
   # Look at glmer from lme4
   # https://mixedpsychophysics.wordpress.com/r-code-a-test/fitting-a-glmm-with-lme4-basic-syntax/
+  
+  df <- res # to remove
+  
+  
   
 }

@@ -1,0 +1,36 @@
+---
+title: "glmm test"
+output: pdf_document
+---
+
+```{r, echo = FALSE, message=FALSE}
+library(lme4)
+
+set.seed(101)
+ss <- sleepstudy[sample(nrow(sleepstudy), size = round(0.9 * nrow(sleepstudy))), ]
+
+```
+
+## Fit the original model
+
+```{r}
+
+m1 <- lmer(Reaction ~ Days + (1 | Subject) + (0 + Days | Subject), ss)
+
+summary(m1)
+
+```
+
+## Fix the params
+
+Let's **force** the estimates to be 700 and 30.
+
+```{r}
+dd <- as.function(m1)
+
+ff <- dd(c(sqrt(700), sqrt(30)))
+
+environment(dd)$pp$beta(1)  ## values of the new estimates
+
+```
+
