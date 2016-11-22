@@ -59,16 +59,21 @@ run;
 
 /* At this point we have the vector and the matrix */
 
-%let st_depth=10;
+%let st_depth=10; /* should be defined by the user, this is the std_depth variable in R*/
 proc iml;
    use parmest_cumcover_in; /* vector with the 9 elements */
    read all var{estimate} into beta_vector; 
    use covB_cumcover_in; /* 9 x 9 matrix */
    read all into V_beta_matrix;
    L_vector= {1 0.2 0.2 0.2 0.2 0.2 &st_depth 50 0};
+   
+   /* 1 line and 2 rows (just to create an empty matirx) */
    create lsmean_cumcover var{estimate variance};
+   
+   
    estimate=L_vector*beta_vector;
-   variance=L_vector*V_beta_matrix*L_vector`; append;
+   variance=L_vector*V_beta_matrix*L_vector`; append; /* do not forget ' which is transpose */
+
 quit;
 data lsmean_cumcover;
    set lsmean_cumcover;
