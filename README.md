@@ -38,7 +38,7 @@ run;
 
 Jacob: I will need some explanation for the rest of the code. I do not understand few things:
 
-1. the 1:174 loop
+1. the 1:174 loop (used to extract relevant parameters 167-174)
 2. how you get a value for _N_
 3. 
 
@@ -56,6 +56,9 @@ data covB_cumcover_in;
    if vandomraade='' then output;
    drop vandomraade month period col2-col166 row effect i;
 run;
+
+/* At this point we have the vector and matrix */
+
 %let st_depth=10;
 proc iml;
    use parmest_cumcover_in;
