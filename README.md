@@ -87,7 +87,7 @@ data lsmean_cumcover;
    set lsmean_cumcover;
    format status $10.;
    do i=1 to 10000;
-      cumcover=exp(estimate+rannor(-1)*sqrt(variance))+1;
+      cumcover=exp(estimate+rannor(-1)*sqrt(variance))+1; /* rnorm(n = 1) in R */
              status='High';
              if cumcover<&boundary_HG then status='Good';
              if cumcover<&boundary_GM then status='Moderate';
@@ -102,4 +102,11 @@ proc univariate data=lsmean_cumcover noprint;
    var cumcover;
    output out=cumcover_dist median=cumcover_median mean=cumcover_mean pctlpre=P_ pctlpts=0.5, 1, 2.5, 5, 50, 95, 97.5, 99, 99.5;
 run;
+
+proc means data=lsmean_cumcover noprint;
+   class status;
+   var cumcover;
+   output out=cumcover_classification n=;
+run;
+
 ```
