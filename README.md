@@ -103,6 +103,8 @@ proc univariate data=lsmean_cumcover noprint;
    output out=cumcover_dist median=cumcover_median mean=cumcover_mean pctlpre=P_ pctlpts=0.5, 1, 2.5, 5, 50, 95, 97.5, 99, 99.5;
 run;
 
+/* Relative number of each "class" */
+
 proc means data=lsmean_cumcover noprint;
    class status;
    var cumcover;
