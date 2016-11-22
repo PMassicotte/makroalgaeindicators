@@ -76,6 +76,12 @@ proc iml;
 
 quit;
 
+/* 5 diffrent classes */
+%let boundary_HG=74.2;
+%let boundary_GM=40.8;
+%let boundary_MP=20.4;
+%let boundary_PB=13.4;
+
 /* 10000 = n_iter */
 data lsmean_cumcover;
    set lsmean_cumcover;
@@ -89,7 +95,9 @@ data lsmean_cumcover;
              if cumcover<&boundary_PB then status='Bad';
       output;
    end;
-run;
+run; /* at the end we have a vector of n = 10000 */
+
+
 proc univariate data=lsmean_cumcover noprint;
    var cumcover;
    output out=cumcover_dist median=cumcover_median mean=cumcover_mean pctlpre=P_ pctlpts=0.5, 1, 2.5, 5, 50, 95, 97.5, 99, 99.5;
