@@ -67,7 +67,7 @@ proc iml;
    read all into V_beta_matrix;
    L_vector= {1 0.2 0.2 0.2 0.2 0.2 &st_depth 50 0};
    
-   /* 1 line and 2 rows (just to create an empty matirx) */
+   /* 1 row and 2 columns (just to create an empty matirx) */
    create lsmean_cumcover var{estimate variance};
    
    
@@ -75,9 +75,20 @@ proc iml;
    variance=L_vector*V_beta_matrix*L_vector`; append; /* do not forget ' which is transpose */
 
 quit;
+
+/* 10000 = n_iter */
 data lsmean_cumcover;
    set lsmean_cumcover;
-   do i=1 to 10000; cumcover=exp(estimate+rannor(-1)*sqrt(variance)); output; end;
+   format status $10.;
+   do i=1 to 10000;
+      cumcover=exp(estimate+rannor(-1)*sqrt(variance))+1;
+             status='High';
+             if cumcover<&boundary_HG then status='Good';
+             if cumcover<&boundary_GM then status='Moderate';
+             if cumcover<&boundary_MP then status='Poor';
+             if cumcover<&boundary_PB then status='Bad';
+      output;
+   end;
 run;
 proc univariate data=lsmean_cumcover noprint;
    var cumcover;
