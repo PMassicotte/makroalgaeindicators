@@ -3,6 +3,9 @@
 This is the git repository for the `makroalgaeindicators` R package.
 
 ```.sas
+
+/* This part is for the GLMM */
+
 %macro cumcov_ind(area,period,no_years);
 data covparms_cumcover_in;
    set covparms_cumcover;
@@ -20,7 +23,9 @@ quit;
 %cumcov_ind('Als Fjord','2001-2006',6);
 %cumcov_ind('Als Fjord','2007-2012',2);
 %cumcov_ind('Als Fjord','2013-2016',3);
+
 /* Producing parameter vector for calculating indicator */
+
 data parmest_cumcover_test;
    set parmest_cumcover_test;
    call symput('parm_assessunit',estimate);
@@ -28,7 +33,17 @@ run;
 data parmest_cumcover_in;
    set parmest_cumcover_test parmest_cumcover(where=(vandomraade=''));
 run;
-/* Producing covariance matrix for calculating indicator */
+
+/* Producing covariance matrix for calculating indicator 
+
+Jacob: I will need some explanation for the rest of the code. I do not understand few things:
+
+1. the 1:174 loop
+2. how you get a value for _N_
+3. 
+
+*/
+
 data covB_cumcover_test;
    set covB_cumcover_test;
    call symput('cov_assessunit',col1);
