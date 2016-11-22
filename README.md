@@ -57,13 +57,13 @@ data covB_cumcover_in;
    drop vandomraade month period col2-col166 row effect i;
 run;
 
-/* At this point we have the vector and matrix */
+/* At this point we have the vector and the matrix */
 
 %let st_depth=10;
 proc iml;
-   use parmest_cumcover_in;
-   read all var{estimate} into beta_vector;
-   use covB_cumcover_in;
+   use parmest_cumcover_in; /* vector with the 9 elements */
+   read all var{estimate} into beta_vector; 
+   use covB_cumcover_in; /* 9 x 9 matrix */
    read all into V_beta_matrix;
    L_vector= {1 0.2 0.2 0.2 0.2 0.2 &st_depth 50 0};
    create lsmean_cumcover var{estimate variance};
