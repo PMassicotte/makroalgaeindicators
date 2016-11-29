@@ -44,22 +44,57 @@ MacroAlgaeIndicator_CumulativeCover <-
            depth_cutoff,
            std_depth = 7,
            std_haardsub = 50,
-           boundaries,
+           boundaries = c(0, 13.4, 20.4, 40.8, 74.2, 1e6),
            n_iter = 10000) {
     
-    # ***************************************************************************
-    # glmm models
-    #
-    # Find which package to use
-    # 1. Gaussian distribution
-    # 2. Allow fixed parameter value
-    # ***************************************************************************
     
-    # Look at glmer from lme4
-    # https://mixedpsychophysics.wordpress.com/r-code-a-test/fitting-a-glmm-with-lme4-basic-syntax/
-    
-   
+    # *************************************************************************
+    # Step 1: Process the "raw" data.
+    # *************************************************************************
     res <- process_data(df)
+    
+    # *************************************************************************
+    # Step 2: Do the GLMM on the processed data.
+    # *************************************************************************
+    
+    estimate_glmm <- 4.9868829217 # use "fake" number until the glmm problem is solved
+    variance_glmm <- 0.149426779 # use "fake" number until the glmm problem is solved
+    
+    # *************************************************************************
+    # Step 3: Read Jacob's data and replace values with those from the GLMMM
+    # *************************************************************************
+    
+    ## Open Jacob's vector and replace the first element at position [1]
+    b_vector <- as.vector(read_sas("data/parmest_cumcover_in.sas7bdat")$Estimate)
+    b_vector[1] <- estimate_glmm
+    
+    ## Open Jacob's matrix and replace 1 value at [1,1] with the estimate from the GLMM
+    v_b_matrix <- as.matrix(read_sas("data/covb_cumcover_in.sas7bdat"))
+    v_b_matrix[1, 1] <- variance_glmm
+    
+    l_vector <- c(1, 0.2, 0.2, 0.2, 0.2, 0.2, std_depth, 50, 0)
+    
+    estimate <- l_vector %*% b_vector
+    
+    variance <- l_vector %*% v_b_matrix %*% l_vector
+    
+    boundary <- c(0, 13.4, 20.4, 40.8, 74.2, 1e6)
+    labels <- c("bad", "poor", "moderate", "good", "high")
+    
+    # *************************************************************************
+    # Step 4: Do the simulations.
+    # *************************************************************************
+    
+    cumcover <- mat.or.vec(n_iter, 1)
+    
+    for (i in 1:n_iter) {
+      cumcover[i] <- exp(estimate + rnorm(1) * sqrt(variance)) + 1
+    }
+    
+    res <- data_frame(
+      cumcover = cumcover,
+      status = cut(cumcover, breaks = boundary, labels = labels)
+    )
     
     return(res)
     
