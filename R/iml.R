@@ -3,8 +3,8 @@ library(haven)
 rm(list = ls())
 
 b_vector <- as.vector(read_sas("data/parmest_cumcover_in.sas7bdat")$Estimate)
-# v_b_matrix <- as.matrix(read_sas("data/covb_cumcover_in.sas7bdat"))
 
+## Open Jacob's matrix and replace 1 value at [1,1] with the estimate from the GLMM
 v_b_matrix <- as.matrix(read_sas("data/covb_cumcover_in.sas7bdat"))
 
 st_depth <- 10
