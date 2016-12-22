@@ -13,12 +13,8 @@ rm(list = ls())
 
 source("R/read_params.R")
 source("R/process_data.R")
-source("R/indicator.R")
+source("R/MacroAlgaeIndicator_CumulativeCover.R")
 
 df <- read_sas("data/alsfjord.sas7bdat")
 
-df <- process_data(df)
-
 indicator <- MacroAlgaeIndicator_CumulativeCover(df)
-
-# write_csv(indicator, "/home/pmassicotte/Desktop/data_ready.csv")
