@@ -1,5 +1,3 @@
-
-
 #' Cumulative cover indicator
 #' 
 #' @param df A datafram with monitoring data for macroalgae according to the 
@@ -54,16 +52,15 @@ MacroAlgaeIndicator_CumulativeCover <-
     # *************************************************************************
     # Step 1: Process the "raw" data.
     # *************************************************************************
-    res <- process_data(df)
+    df <- CumulativeCover_process_data(df)
     
     # *************************************************************************
     # Step 2: Do the GLMM on the processed data.
     # *************************************************************************
     
-    # Do the glmm call here!
-    
-    estimate_glmm <- 4.9868829217 # use "fake" number until the glmm problem is solved
-    variance_glmm <- 0.149426779 # use "fake" number until the glmm problem is solved
+    glmm_res <- CumulativeCover_glmm(df)
+    estimate_glmm <- glmm_res$estimate_glmm
+    variance_glmm <- glmm_res$variance_glmm
     
     # *************************************************************************
     # Step 3: Read Jacob's data and replace values with those from the GLMMM
@@ -95,7 +92,7 @@ MacroAlgaeIndicator_CumulativeCover <-
       cumcover[i] <- exp(estimate + rnorm(1) * sqrt(variance)) + 1
     }
     
-    res <- data_frame(
+    simulations <- data_frame(
       cumcover = cumcover,
       status = cut(cumcover, breaks = boundaries, labels = labels)
     )
@@ -104,12 +101,106 @@ MacroAlgaeIndicator_CumulativeCover <-
     # Step 5: Proportion of each class (between 0 and 1).
     # *************************************************************************
     
-    
+    proportions <- data.frame(table(simulations$status)/nrow(simulations))
+    names(proportions) <- c("class", "proportion")
     
     # *************************************************************************
     # Step 6: Calculate the requested percentil number
     # *************************************************************************
     
+    myquantile <- quantile(simulations$cumcover, conf_lvl)
+    
+    # *************************************************************************
+    # Step 7: Wrap-up results
+    # *************************************************************************
+    
+    res <- list(proportions, myquantile)
+    
     return(res)
     
   }
+
+
+#' GLMM for the cumulative cover indicator
+#'
+#' @param df A data frame containing processed data ready for the GLMM.
+#'
+#' @return A list wiht both estimate and variance from the GLMM model.
+#' @export
+#'
+#' @examples
+CumulativeCover_glmm <- function(df) {
+  
+  estimate_glmm <- 4.9868829217 # use "fake" number until the glmm problem is solved
+  variance_glmm <- 0.149426779 # use "fake" number until the glmm problem is solved
+  
+  return(list(estimate_glmm = estimate_glmm, variance_glmm = variance_glmm))
+  
+}
+
+CumulativeCover_process_data <- function(df) {
+  
+  
+  # How to break the depth into "classes"
+  mybreaks <- c(0, seq(1, 21, by = 2), 100)
+  
+  res <- df %>%
+    mutate(dato = as.Date(as.character(dato), format = "%Y%m%d")) %>% 
+    group_by(
+      vandomraade,
+      ObservationsstedID,
+      dato,
+      kildestationsnavn,
+      proevetager,
+      proeveID,
+      hardbund_daekpct, 
+      totcover_daekpct,
+      dybde
+    ) %>%
+    summarise(
+      cumcov = sum(art_daekpct[Steneck < 7]),
+      opportunist = sum(art_daekpct[Steneck <= 3]),
+      n_perenial = sum(Steneck < 7 & art_daekpct >= 1 & Growth_strategy == "P")
+    ) %>% 
+    ungroup() %>% 
+    mutate(hardbund_daekpct = ifelse(hardbund_daekpct < 0, NA, hardbund_daekpct)) %>% 
+    mutate(opportunist = ifelse(cumcov > 0 & is.na(opportunist), 0, opportunist)) %>% 
+    mutate(n_perenial = ifelse(is.na(cumcov) & is.na(n_perenial), 0, n_perenial)) %>% 
+    
+    mutate(prop_opportunist = opportunist / cumcov) %>% 
+    mutate(arsin_prop_opportunist = asin(sqrt(prop_opportunist))) %>% 
+    mutate(log_n_perenial = log(n_perenial + 1)) %>% 
+    mutate(log_cumcov = log(cumcov + 1)) %>% 
+    mutate(log_cumcov = ifelse(cumcov < (totcover_daekpct - 20), NA, log_cumcov)) %>% 
+    
+    mutate(depth_class = cut(dybde, mybreaks, right = FALSE, include.lowest = TRUE)) %>% 
+    mutate(haard_ind1 = ifelse(hardbund_daekpct < 50, hardbund_daekpct, 50)) %>% 
+    mutate(haard_ind2 = ifelse(hardbund_daekpct < 50, 0, hardbund_daekpct - 50)) %>% 
+    mutate(month = lubridate::month(dato)) %>% 
+    mutate(year = lubridate::year(dato)) %>% 
+    
+    filter(month %in% 5:9) %>% 
+    filter(dybde < 17) %>% 
+    filter(dybde > 3) # to change
+  
+  
+  # ***************************************************************************
+  # At this point we have the data correctly processed at the first level.
+  # Now, lets calculate log_cumcover_mod.
+  # ***************************************************************************
+  
+  params <- read_params()[[2]] %>% 
+    select(Effect, month, Estimate)
+  
+  parm_depth <- params$Estimate[params$Effect == "depth"]
+  parm_H1 <- params$Estimate[params$Effect == "haard_ind1"]
+  parm_H2 <- params$Estimate[params$Effect == "haard_ind2"]
+  
+  res <- filter(params, Effect == "month") %>% 
+    full_join(res, ., by = "month") %>% 
+    mutate(log_cumcover_mod = log_cumcov - Estimate - parm_depth * dybde - haard_ind1 * parm_H1 - haard_ind2 * parm_H2) %>% 
+    drop_na(log_cumcover_mod)
+  
+  return(res)
+  
+}
