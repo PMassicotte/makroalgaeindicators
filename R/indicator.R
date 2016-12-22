@@ -44,7 +44,7 @@ MacroAlgaeIndicator_CumulativeCover <-
            depth_cutoff,
            std_depth = 7,
            std_haardsub = 50,
-           boundaries = c(13.4, 20.4, 40.8, 74.2),
+           boundaries = c(13.4, 20.4, 40.8, 74.2), # Remove default
            n_iter = 10000) {
     
     boundaries <- c(-1e6, boundaries, 1e6)
@@ -79,7 +79,6 @@ MacroAlgaeIndicator_CumulativeCover <-
     
     variance <- l_vector %*% v_b_matrix %*% l_vector
     
-    boundary <- c(0, 13.4, 20.4, 40.8, 74.2, 1e6)
     labels <- c("bad", "poor", "moderate", "good", "high")
     
     # *************************************************************************
@@ -94,7 +93,7 @@ MacroAlgaeIndicator_CumulativeCover <-
     
     res <- data_frame(
       cumcover = cumcover,
-      status = cut(cumcover, breaks = boundary, labels = labels)
+      status = cut(cumcover, breaks = boundaries, labels = labels)
     )
     
     return(res)
