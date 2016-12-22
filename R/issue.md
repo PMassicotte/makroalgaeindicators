@@ -75,3 +75,63 @@ Now, let's compare original estimates with the new ones.
 As we can see, these are slightly different. What I am missing?
 
 Thank you for your help, Philippe
+
+    opt <- list(par = c(0, 0),
+                fval = ff,
+                conv = 0)
+                lmod <- lFormula(Reaction ~ Days + (1 | Subject) + (0 + Days | Subject), ss)
+                m1X <- mkMerMod(environment(dd),
+                opt,
+                lmod$reTrms,
+                fr = lmod$fr,
+                mc = quote(hacked_lmer()))
+
+                buildMM <- function(theta) {
+                  dd <- as.function(m1)
+                  ff <- dd(theta)
+                  opt <- list(par = c(0, 0),
+                  fval = ff,
+                  conv = 0)
+                  mm <- mkMerMod(environment(dd),
+                  opt,
+                  lmod$reTrms,
+                  fr = lmod$fr,
+                  mc = quote(hacked_lmer()))
+                  return(mm)
+                }
+
+    objfun <- function(x,target=c(700,30)) {
+       mm <- buildMM(sqrt(x))
+       return(sum((unlist(VarCorr(mm))-target)^2))
+    }
+    s0 <- c(700,30)/sigma(m1)^2
+    opt <- optim(fn=objfun,par=s0)
+
+    ## Warning in sqrt(x): NaNs produced
+
+    mm_final <- buildMM(sqrt(opt$par))
+    summary(mm_final)
+
+    ## Linear mixed model fit by REML ['lmerMod']
+    ## 
+    ## REML criterion at convergence: 1581
+    ## 
+    ## Scaled residuals: 
+    ##     Min      1Q  Median      3Q     Max 
+    ## -3.8453 -0.4798  0.0206  0.4994  4.9268 
+    ## 
+    ## Random effects:
+    ##  Groups    Name        Variance Std.Dev.
+    ##  Subject   (Intercept) 700      26.458  
+    ##  Subject.1 Days         30       5.477  
+    ##  Residual              700      26.458  
+    ## Number of obs: 162, groups:  Subject, 18
+    ## 
+    ## Fixed effects:
+    ##             Estimate Std. Error t value
+    ## (Intercept)  251.580      7.330   34.32
+    ## Days          10.378      1.479    7.02
+    ## 
+    ## Correlation of Fixed Effects:
+    ##      (Intr)
+    ## Days -0.215

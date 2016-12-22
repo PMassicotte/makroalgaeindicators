@@ -1,8 +1,15 @@
 
-# estimates <- read_params()[[1]]
-# estimates$Estimate[estimates$CovParm == "year(vandomr*period)"] <- 
+source("R/process_data.R")
+source("R/read_params.R")
 
-mod1 <- lmer(log_cumcover_mod ~ (1 | kildestationsnavn) + (1 | year) + (1 | kildestationsnavn:year) + (1 | proevetager), 
+res <- read_sas("data/alsfjord.sas7bdat") %>% 
+  process_data() 
+
+mod1 <- lmer(log_cumcover_mod ~ 
+               (1 | kildestationsnavn) + 
+               (1 | year) + 
+               (1 | kildestationsnavn:year) + 
+               (1 | proevetager), 
              data = res,
              REML = TRUE)
 
