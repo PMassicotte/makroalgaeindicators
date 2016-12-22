@@ -34,6 +34,7 @@
 #'   standardized indicator for cumulative cover. The boundary values should be
 #'   given in the order high-good, good-moderate, moderate-poor, poor-bad.
 #' @param n_iter Maximum number of iteration for Montecarlo simulation.
+#' @param conf_lvl Percentil number
 #'   
 #' @return
 #' @export
@@ -45,7 +46,8 @@ MacroAlgaeIndicator_CumulativeCover <-
            std_depth = 7,
            std_haardsub = 50,
            boundaries = c(13.4, 20.4, 40.8, 74.2), # Remove default
-           n_iter = 10000) {
+           n_iter = 10000,
+           conf_lvl = 0.5) {
     
     boundaries <- c(-1e6, boundaries, 1e6)
     
@@ -57,6 +59,8 @@ MacroAlgaeIndicator_CumulativeCover <-
     # *************************************************************************
     # Step 2: Do the GLMM on the processed data.
     # *************************************************************************
+    
+    # Do the glmm call here!
     
     estimate_glmm <- 4.9868829217 # use "fake" number until the glmm problem is solved
     variance_glmm <- 0.149426779 # use "fake" number until the glmm problem is solved
@@ -95,6 +99,16 @@ MacroAlgaeIndicator_CumulativeCover <-
       cumcover = cumcover,
       status = cut(cumcover, breaks = boundaries, labels = labels)
     )
+    
+    # *************************************************************************
+    # Step 5: Proportion of each class (between 0 and 1).
+    # *************************************************************************
+    
+    
+    
+    # *************************************************************************
+    # Step 6: Calculate the requested percentil number
+    # *************************************************************************
     
     return(res)
     
