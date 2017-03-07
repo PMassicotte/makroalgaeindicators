@@ -75,6 +75,12 @@ modified_lmer <- function(df) {
   
   fixef(mm_final)
   
+  # estimate is
+  
+  estimate <- fixef(mm_final)
+  variance <- vcov(mm_final)@x
+ 
+  
   # return(list(estimate_glmm = estimate_glmm, variance_glmm = variance_glmm))
   
 }
