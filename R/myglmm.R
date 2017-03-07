@@ -1,9 +1,9 @@
 
-source("R/process_data.R")
+source("R/MacroAlgaeIndicator_CumulativeCover.R")
 source("R/read_params.R")
 
 res <- read_sas("data/alsfjord.sas7bdat") %>% 
-  process_data() 
+  CumulativeCover_process_data() 
 
 mod1 <- lmer(log_cumcover_mod ~ 
                (1 | kildestationsnavn) + 
