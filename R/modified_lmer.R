@@ -65,7 +65,8 @@ modified_lmer <- function(df) {
   
   p <- as.vector(p$Estimate)
   
-  target <- as.vector(p)[1:4] 
+  ## Change order to match the order provided in SAS by Jacob
+  target <- as.vector(p)[c(3, 2, 1, 4)] 
 
   s0 <- target / sigma(m1)^2
   
@@ -88,7 +89,9 @@ modified_lmer <- function(df) {
   
   # as.matrix(getME(mm_final, "Lambdat")) * getME(mm_final,"sigma")
   
-  sigma <- getME(mm_final,"sigma")
+  # sigma <- getME(mm_final,"sigma")
+  
+  sigma <- sqrt(p[5])
 
   n <- getME(mm_final,"n")
   R <- diag(sigma^2, n, n)
