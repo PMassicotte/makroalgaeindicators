@@ -97,6 +97,13 @@ modified_lmer <- function(df) {
   z_matrix <- as.matrix(getME(mm_final,"Z"))
   
   V <- z_matrix %*% g_matrix %*% t(z_matrix) + R
+  
+  X <- as.vector(getME(mm_final,"X"))
+  y_vector <- as.vector(getME(mm_final,"y"))
+  
+  Vinv <- solve(V)
+  Beta <- solve(X %*% Vinv %*% (X)) %*% X %*% Vinv %*% y_vector
+  
 }
 
 
