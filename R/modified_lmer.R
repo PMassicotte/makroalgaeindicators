@@ -104,6 +104,8 @@ modified_lmer <- function(df) {
   Vinv <- solve(V)
   Beta <- solve(X %*% Vinv %*% (X)) %*% X %*% Vinv %*% y_vector
   
+  V_Beta <- solve(X %*% Vinv %*% X)
+  
 }
 
 
