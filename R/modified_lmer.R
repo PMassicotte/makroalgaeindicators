@@ -89,9 +89,14 @@ modified_lmer <- function(df) {
   # as.matrix(getME(mm_final, "Lambdat")) * getME(mm_final,"sigma")
   
   sigma <- getME(mm_final,"sigma")
- 
+
+  n <- getME(mm_final,"n")
+  R <- diag(sigma^2, n, n)
+  
   g_matrix <- as.matrix(getME(mm_final,"Lambda")) * as.matrix(getME(mm_final,"Lambdat")) * sigma^2
-   
+  z_matrix <- as.matrix(getME(mm_final,"Z"))
+  
+  V <- z_matrix %*% g_matrix %*% t(z_matrix) + R
 }
 
 
