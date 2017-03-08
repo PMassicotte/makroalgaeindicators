@@ -80,9 +80,18 @@ modified_lmer <- function(df) {
   estimate <- fixef(mm_final)
   variance <- vcov(mm_final)@x
  
-  
+  getME(mm_final, "y")
+  getME(mm_final, "X")
   # return(list(estimate_glmm = estimate_glmm, variance_glmm = variance_glmm))
   
+  getME(mm_final, "beta")
+  
+  # as.matrix(getME(mm_final, "Lambdat")) * getME(mm_final,"sigma")
+  
+  sigma <- getME(mm_final,"sigma")
+ 
+  g_matrix <- as.matrix(getME(mm_final,"Lambda")) * as.matrix(getME(mm_final,"Lambdat")) * sigma^2
+   
 }
 
 
