@@ -1,4 +1,4 @@
-buildMM <- function(theta) {
+buildMM <- function(theta,m1,lmod) {
   
   dd <- as.function(m1)
   
@@ -16,17 +16,18 @@ buildMM <- function(theta) {
   return(mm)
 }
 
-objfun <- function(x, target) {
+objfun <- function(x, target,m1,lmod) {
   
-  mm <- buildMM(sqrt(x))
+  mm <- buildMM(sqrt(x),m1,lmod)
   
   return(sum((unlist(VarCorr(mm)) - target)^2))
 }
 
-modified_lmer <- function(df) {
+modified_lmer <- function(indicator,df) {
   
-  m1 <- lmer(
-    log_cumcover_mod ~
+  m1 <- 
+    lmer(
+    residual ~
       (1 | kildestationsnavn) +
       (1 | year) +
       (1 | kildestationsnavn:year) +
@@ -42,7 +43,7 @@ modified_lmer <- function(df) {
   
   opt <- list(par = c(0, 0), fval = ff, conv = 0)
   
-  lmod <- lFormula(log_cumcover_mod ~
+  lmod <- lFormula(residual ~
                      (1 | kildestationsnavn) +
                      (1 | year) +
                      (1 | kildestationsnavn:year) +
@@ -56,23 +57,25 @@ modified_lmer <- function(df) {
                   fr = lmod$fr,
                   mc = quote(hacked_lmer()))
   
-  # Remove resisuals estimate for now
+  # Remove residuals estimate for now
   
   no_year <- length(unique(df$year))
-  p <- read_params()[[1]]
-  p$Estimate[p$CovParm == "year(vandomr*period)"] <- 
-    p$Estimate[p$CovParm == "year(vandomr*period)"] * (1 - no_year / 6)
+  covparm <- switch(indicator,CumulativeCover = read_params()[[1]],
+                              PropOpportunist = read_params()[[3]],
+                              NPerennials     = read_params()[[5]])
   
-  p <- as.vector(p$Estimate)
+  covparm$Estimate[covparm$CovParm == "year(vandomr*period)"] <- 
+    covparm$Estimate[covparm$CovParm == "year(vandomr*period)"] * (1 - no_year / 6)
+  
+  covparm <- as.vector(covparm$Estimate)
   
   ## Change order to match the order provided in SAS by Jacob
-  target <- as.vector(p)[c(3, 2, 1, 4)] 
 
-  s0 <- target / sigma(m1)^2
+  s0 <- as.vector(covparm)[c(3, 2, 1, 4)] / sigma(m1)^2
   
-  opt <- optim(fn = objfun, par = s0, target = target)
+  opt <- optim(fn = objfun, par = s0, target = as.vector(covparm)[c(3, 2, 1, 4)],m1=m1,lmod=lmod)
   
-  mm_final <- buildMM(sqrt(opt$par))
+  mm_final <- buildMM(sqrt(opt$par),m1,lmod)
   
   fixef(mm_final)
   
@@ -81,20 +84,10 @@ modified_lmer <- function(df) {
   estimate <- fixef(mm_final)
   variance <- vcov(mm_final)@x
  
-  getME(mm_final, "y")
-  getME(mm_final, "X")
-  # return(list(estimate_glmm = estimate_glmm, variance_glmm = variance_glmm))
+  sigma <- getME(mm_final,"sigma")
   
-  getME(mm_final, "beta")
-  
-  # as.matrix(getME(mm_final, "Lambdat")) * getME(mm_final,"sigma")
-  
-  # sigma <- getME(mm_final,"sigma")
-  
-  sigma <- sqrt(p[5])
-
   n <- getME(mm_final,"n")
-  R <- diag(sigma^2, n, n)
+  R <- diag(covparm[5], n, n)
   
   g_matrix <- as.matrix(getME(mm_final,"Lambda")) * as.matrix(getME(mm_final,"Lambdat")) * sigma^2
   z_matrix <- as.matrix(getME(mm_final,"Z"))
@@ -108,6 +101,7 @@ modified_lmer <- function(df) {
   Beta <- solve(X %*% Vinv %*% (X)) %*% X %*% Vinv %*% y_vector
   
   V_Beta <- solve(X %*% Vinv %*% X)
+  return(list(estimate_glmm = Beta, variance_glmm = V_Beta))
   
 }
 
