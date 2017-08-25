@@ -15,7 +15,6 @@ source("R/read_params.R")
 source("R/modified_lmer.R")
 source("R/MacroAlgaeIndicator_CumulativeCover.R")
 
-df <- read_sas("data/alsfjord.sas7bdat")
 df <- read_sas("data/alsfjord_2013_2016.sas7bdat")
 df <- read_sas("data/alsfjord_2007_2012.sas7bdat")
 df <- read_sas("data/alsfjord_2001_2006.sas7bdat")
