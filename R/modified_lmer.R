@@ -25,7 +25,8 @@ objfun <- function(x, target,m1,lmod) {
 
 modified_lmer <- function(indicator,df) {
   
-  m1 <- 
+  options(warn=-1)  # Switch off warnings because varcomp can be 0 when estimated on a small dataset
+    m1 <- 
     lmer(
     residual ~
       (1 | kildestationsnavn) +
@@ -74,6 +75,7 @@ modified_lmer <- function(indicator,df) {
   s0 <- as.vector(covparm)[c(3, 2, 1, 4)] / sigma(m1)^2
   
   opt <- optim(fn = objfun, par = s0, target = as.vector(covparm)[c(3, 2, 1, 4)],m1=m1,lmod=lmod)
+  options(warn=0)   # Switch on warnings again
   
   mm_final <- buildMM(sqrt(opt$par),m1,lmod)
   
