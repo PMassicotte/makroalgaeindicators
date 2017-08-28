@@ -5,7 +5,7 @@
 #' 
 #' @param df A dataframe with monitoring data for macroalgae according to the 
 #'   Danish National Marine Monitoring Program. The dataframe should contain the
-#'   following variables:
+#'   following variables: 
 #'   
 #'   \describe{ 
 #'   \item{kildestationnavn}{An identifier for the monitoring
