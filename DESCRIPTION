@@ -1,0 +1,15 @@
+Package: makroalgaeIndicators
+Title: MacroalgaeIndicators
+Version: 0.0.0.9000
+Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Description: Calculates the distribution of ecological indicators for macroalgae used in Danish assessment of ecological status according to the European Water Framework Directive. Three different indicators are calculated from a dataframe containing substrate-specific cover of macroalgae species over depth transects: 1) cumulative cover of all macroalgae species, 2) the relative proportion of opportunistic macroalgae species’ cover relative to the total cumulative cover, and 3) the number of perennial macroalgae species. The functions operate on Danish standard macroalgae monitoring data and gives the indicator’s distribution among the five ecological status classes in the WFD.
+Depends: R (>= 3.4.1)
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports: dplyr,
+    haven,
+    lubridate,
+    lme4,
+    tidyr

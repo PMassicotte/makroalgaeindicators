@@ -1,0 +1,93 @@
+---
+title: "Untitled"
+output: 
+  pdf_document: 
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(lme4)
+set.seed(101)
+ss <- sleepstudy[sample(nrow(sleepstudy), size = round(0.9 * nrow(sleepstudy))), ] 
+
+ss <- subset(ss, Subject == 308)
+
+## This is the data used for this example, Jacob, you can use that in SAS to see
+## if you can reproduce my results
+
+ss
+```
+
+
+```{r, tidy=FALSE}
+
+
+m1 <- lmer(Reaction ~ Days + (1|Subject) + (0+Days|Subject), ss, 
+           control = lmerControl(check.nlev.gtr.1="ignore"))
+
+summary(m1)
+
+fixef(m1)
+
+dd <- as.function(m1)
+
+ff <- dd(c(0, 0))
+
+opt <- list(par = c(0, 0), fval = ff, conv = 0)
+
+lmod <- lFormula(Reaction ~ Days + (1|Subject) + (0+Days|Subject), ss, control = lmerControl(check.nlev.gtr.1="ignore"))
+
+m1X <- mkMerMod(environment(dd),
+                opt,
+                lmod$reTrms,
+                fr = lmod$fr,
+                mc = quote(hacked_lmer()))
+
+
+buildMM <- function(theta) {
+  
+  dd <- as.function(m1)
+  
+  ff <- dd(theta)
+  
+  opt <- list(par = c(0, 0), fval = ff, conv = 0)
+  
+  mm <-
+    mkMerMod(environment(dd),
+             opt,
+             lmod$reTrms,
+             fr = lmod$fr,
+             mc = quote(hacked_lmer()))
+  
+  return(mm)
+}
+
+objfun <- function(x, target = c(700, 30)) {
+  
+  mm <- buildMM(sqrt(x))
+  
+  return(sum((unlist(VarCorr(mm)) - target)^2))
+}
+```
+
+Here I force the variances to be 700 and 30
+
+```{r, tidy=FALSE}
+#' Fix variances to 700 and 30.
+s0 <- c(700, 30) / sigma(m1)^2
+
+opt <- optim(fn = objfun, par = s0)
+
+mm_final <- buildMM(sqrt(opt$par))
+
+#' This works fine!
+summary(mm_final)
+
+
+```
+
+So, if I fix variances to 700 and 30, the fixed effect estimates are `r fixef(mm_final)`.
