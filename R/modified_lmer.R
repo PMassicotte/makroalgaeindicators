@@ -26,7 +26,7 @@ objfun <- function(x, target,m1,lmod) {
 #' @import lme4
 modified_lmer <- function(indicator,df) {
   
-  # library(lme4)
+  library(lme4)
   
   options(warn = -1)  # Switch off warnings because varcomp can be 0 when estimated on a small dataset
   
