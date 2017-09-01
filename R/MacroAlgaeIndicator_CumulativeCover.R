@@ -39,10 +39,11 @@
 
 #' @importFrom haven read_sas
 #' @importFrom stats optim quantile rnorm sd vcov
-#' @importFrom tidyr drop_na_
+#' @importFrom tidyr drop_na_ drop_na
 #' @import dplyr
 #' @import lme4
 #' @importFrom lubridate month year parse_date_time2
+#' @importFrom magrittr %>%
 #'   
 #' @return TODO
 #' @export
