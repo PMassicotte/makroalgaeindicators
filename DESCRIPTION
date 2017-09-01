@@ -12,4 +12,5 @@ Imports: dplyr,
     haven,
     lubridate,
     lme4,
-    tidyr
+    tidyr,
+    magrittr
